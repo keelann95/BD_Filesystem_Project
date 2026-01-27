@@ -1,1 +1,1 @@
-delete a file me.txt
+rename the file me.txt  hey.txt

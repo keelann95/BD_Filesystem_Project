@@ -7,6 +7,8 @@ const fs = require("fs/promises");
   //commands
   const CREATE_FILE = "create a file";
   const DELETE_FILE = 'delete a file'
+  const RENAME_FILE = "rename the file"
+  const ADD_TO_FILE = "add the file"
 
   const createFile = async (path) => {
     try {
@@ -34,6 +36,20 @@ const fs = require("fs/promises");
         console.error(error);
         
      }
+    }
+  }
+
+  const renameFilePath = async (oldPath, newPath) =>{
+
+    try {
+        await fs.rename(oldPath, newPath)
+        return  console.log(`Renamed ${oldPath} → ${newPath}`);
+    } catch (error) {
+        if(error.code === 'ENOENT'){
+            console.log("source file does not exist");
+        }
+        else console.error(error);
+        
     }
   }
 
@@ -73,6 +89,23 @@ const fs = require("fs/promises");
       const deleteFilePath = command.slice(DELETE_FILE.length + 1).trim();
     deletion(deleteFilePath);
     }
+
+
+    //renaming a file
+
+    if(command.startsWith(RENAME_FILE)){
+
+        const renameFile = command.slice(RENAME_FILE.length + 1).trim()
+
+        const [oldPath, newPath] = renameFile.split(/\s+/);
+        if (!oldPath || !newPath){
+    console.log("Usage: rename the file <old> <new>");
+        return;
+
+        }
+        await renameFilePath(oldPath, newPath)
+    }
+
   });
 
 
