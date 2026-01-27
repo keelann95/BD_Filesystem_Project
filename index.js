@@ -1,6 +1,13 @@
 const fs = require("fs/promises");
 
 (async () => {
+
+
+
+  //commands
+  const CREATE_FILE = "create a file";
+  const DELETE_FILE = 'delete a file'
+
   const createFile = async (path) => {
     try {
       const existingPath = await fs.open(path, "r");
@@ -14,8 +21,22 @@ const fs = require("fs/promises");
     }
   };
 
-  //commands
-  const CREATE_FILE = "create a file";
+  const deletion = async (path) =>{
+    try {
+        
+        await fs.unlink(path)
+        console.log(`File ${path} deleted successfully`);
+    } catch (error) {
+     if(error.code ==='ENOENT'){
+            console.log(`The file ${path} does not exist`);
+        
+     }else{
+        console.error(error);
+        
+     }
+    }
+  }
+
 
   //read the file
   const commandFileHandler = await fs.open("./command.txt", "r");
@@ -39,15 +60,22 @@ const fs = require("fs/promises");
     //we always want to read the whole content from start to end
     await commandFileHandler.read(buff, offset, length, position);
 
-    const command = buff.toString("utf-8");
+    const command = buff.toString("utf-8").trim();
     console.log(command);
 
     //create a file <path>
-    if (command.includes(CREATE_FILE)) {
-      const filePath = command.substring(CREATE_FILE.length + 1);
+    if (command.startsWith(CREATE_FILE)) {
+      const filePath = command.substring(CREATE_FILE.length + 1).trim();
       createFile(filePath);
     }
+    //deleting a file <path>
+    if(command.startsWith(DELETE_FILE)){
+      const deleteFilePath = command.slice(DELETE_FILE.length + 1).trim();
+    deletion(deleteFilePath);
+    }
   });
+
+
 
   //watches the file
   const watcher = fs.watch("./command.txt");
