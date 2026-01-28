@@ -1,14 +1,11 @@
 const fs = require("fs/promises");
 
 (async () => {
-
-
-
   //commands
   const CREATE_FILE = "create a file";
-  const DELETE_FILE = 'delete a file'
-  const RENAME_FILE = "rename the file"
-  const ADD_TO_FILE = "add the file"
+  const DELETE_FILE = "delete a file";
+  const RENAME_FILE = "rename the file";
+  const ADD_TO_FILE = "add the file";
 
   const createFile = async (path) => {
     try {
@@ -23,36 +20,42 @@ const fs = require("fs/promises");
     }
   };
 
-  const deletion = async (path) =>{
+  const deletion = async (path) => {
     try {
-        
-        await fs.unlink(path)
-        console.log(`File ${path} deleted successfully`);
+      await fs.unlink(path);
+      console.log(`File ${path} deleted successfully`);
     } catch (error) {
-     if(error.code ==='ENOENT'){
-            console.log(`The file ${path} does not exist`);
-        
-     }else{
+      if (error.code === "ENOENT") {
+        console.log(`The file ${path} does not exist`);
+      } else {
         console.error(error);
-        
-     }
+      }
     }
-  }
+  };
 
-  const renameFilePath = async (oldPath, newPath) =>{
-
+  const renameFilePath = async (oldPath, newPath) => {
     try {
-        await fs.rename(oldPath, newPath)
-        return  console.log(`Renamed ${oldPath} → ${newPath}`);
+      await fs.rename(oldPath, newPath);
+      return console.log(`Renamed ${oldPath} → ${newPath}`);
     } catch (error) {
-        if(error.code === 'ENOENT'){
-            console.log("source file does not exist");
-        }
-        else console.error(error);
-        
+      if (error.code === "ENOENT") {
+        console.log("source file does not exist");
+      } else console.error(error);
     }
-  }
+  };
 
+  const appendFile = async (path, content) => {
+    try {
+      await fs.appendFile(path, content + "\n");
+      console.log(`Added text to ${path}`);
+    } catch (error) {
+      if (error.code === "ENOENT") {
+        console.log(`The file ${path} does not exist`);
+      } else {
+        console.error(error);
+      }
+    }
+  };
 
   //read the file
   const commandFileHandler = await fs.open("./command.txt", "r");
@@ -85,30 +88,37 @@ const fs = require("fs/promises");
       createFile(filePath);
     }
     //deleting a file <path>
-    if(command.startsWith(DELETE_FILE)){
+    if (command.startsWith(DELETE_FILE)) {
       const deleteFilePath = command.slice(DELETE_FILE.length + 1).trim();
-    deletion(deleteFilePath);
+      deletion(deleteFilePath);
     }
-
 
     //renaming a file
 
-    if(command.startsWith(RENAME_FILE)){
+    if (command.startsWith(RENAME_FILE)) {
+      const renameFile = command.slice(RENAME_FILE.length + 1).trim();
 
-        const renameFile = command.slice(RENAME_FILE.length + 1).trim()
-
-        const [oldPath, newPath] = renameFile.split(/\s+/);
-        if (!oldPath || !newPath){
-    console.log("Usage: rename the file <old> <new>");
+      const [oldPath, newPath] = renameFile.split(/\s+/);
+      if (!oldPath || !newPath) {
+        console.log("Usage: rename the file <old> <new>");
         return;
-
-        }
-        await renameFilePath(oldPath, newPath)
+      }
+      await renameFilePath(oldPath, newPath);
     }
 
+    if (command.startsWith(ADD_TO_FILE)) {
+      const addFile = command.slice(ADD_TO_FILE.length + 1).trim();
+      const [path, ...content] = addFile.split(/\s+/);
+      const fullContent = content.join(" ");
+
+      if (!path || !fullContent) {
+        console.log("Usage: add the file <path> <text>");
+        return;
+    }
+    await appendFile(path, fullContent);
+}
+
   });
-
-
 
   //watches the file
   const watcher = fs.watch("./command.txt");
